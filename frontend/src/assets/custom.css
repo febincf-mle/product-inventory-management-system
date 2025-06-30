@@ -1,0 +1,57 @@
+.login-logo img {
+    max-width: 200px !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 300px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1100;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+}
+
+.notification.active {
+    transform: translateX(0);
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+}
+
+.notification-content i {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.notification.success .notification-content i {
+    color: #4caf50;
+}
+
+.notification.info .notification-content i {
+    color: #2196f3;
+}
+
+.notification.error .notification-content i {
+    color: #f44336;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 1rem;
+}

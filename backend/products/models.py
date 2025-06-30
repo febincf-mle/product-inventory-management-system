@@ -5,6 +5,7 @@ from versatileimagefield.fields import VersatileImageField
 
 
 class Products(models.Model):
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     ProductID = models.BigIntegerField(unique=True)
     ProductCode = models.CharField(max_length=255, unique=True)
@@ -18,7 +19,6 @@ class Products(models.Model):
     HSNCode = models.CharField(max_length=255, blank=True, null=True)
     TotalStock = models.DecimalField(default=0.00, max_digits=20, decimal_places=8, blank=True, null=True)
 
-    # Newly added field for assigning Category.
     Category = models.ForeignKey(
         'Category',
         on_delete=models.SET_NULL,
@@ -26,6 +26,16 @@ class Products(models.Model):
         blank=True,
         related_name='products'
     )
+
+    # To match with the frontend.
+    featured = models.BooleanField(default=True)
+    is_new = models.BooleanField(default=True)
+    in_stock = models.BooleanField(default=True)
+    rating = models.FloatField(default=4.5)
+    review_count = models.IntegerField(default=100)
+    discount = models.DecimalField(default=0.00, max_digits=20, decimal_places=2, blank=True, null=True)
+    old_price = models.DecimalField(default=0.00, max_digits=20, decimal_places=2, blank=True, null=True)
+    price = models.DecimalField(default=0.00, max_digits=20, decimal_places=2, blank=True, null=True)
 
     class Meta:
         db_table = "products_product"
@@ -38,7 +48,6 @@ class Products(models.Model):
         return self.ProductName
     
 
-# Category model (Bonus)
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, null=True)
@@ -47,7 +56,6 @@ class Category(models.Model):
         return self.name
     
 
-# Variant type (e.g., Size, Color)
 class Variant(models.Model):
     product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name='variants')
     name = models.CharField(max_length=100)
@@ -59,7 +67,6 @@ class Variant(models.Model):
         return f"{self.product.ProductName} - {self.name}"
 
 
-# Variant option (e.g., Red, Blue for Color)
 class VariantOption(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='options')
     value = models.CharField(max_length=100)
@@ -71,14 +78,17 @@ class VariantOption(models.Model):
         return f"{self.variant.name}: {self.value}"
 
 
-# ProductVariantCombination (e.g., Shirt - Red - M)
 class ProductVariantCombination(models.Model):
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name='variant_combinations')
     sku = models.CharField(max_length=100, unique=True)  # unique identifier
+    description = models.TextField(null=True, blank=True)
+    product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name='variant_combinations')
     options = models.ManyToManyField(VariantOption)
-    stock = models.DecimalField(default=0.00, max_digits=20, decimal_places=8)
+    stock = models.IntegerField(default=0)
     is_deleted = models.BooleanField(default=False)
+    created_date = models.DateTimeField(auto_now_add=True, null=True)
+    updated_date = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         opts = ", ".join([opt.value for opt in self.options.all()])

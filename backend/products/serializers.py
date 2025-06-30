@@ -2,42 +2,57 @@ from django.contrib.auth.models import User
 
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
-from products.models import Products, Variant, VariantOption, ProductVariantCombination
 
+from products.models import Category, Products, Variant, VariantOption, ProductVariantCombination
 
-# ---------------------------------------- Serializers for Listing --------------------------------------- #
 
 class ProductListSerializer(ModelSerializer):
+
+    ProductImage = serializers.ImageField(use_url=True)
+    Category = serializers.SerializerMethodField()
+
     class Meta:
         model = Products
-        fields = ['id', 'ProductName', 'TotalStock']
+        fields = ['id', 'ProductID', 'ProductCode', 'ProductName', 'ProductImage', 'CreatedDate', 
+                  'UpdatedDate', 'TotalStock', 'Category', 'is_new', 'in_stock', 'rating', 'discount', 
+                  'review_count', 'old_price', 'price']
+    
+    def get_Category(self, obj):
+        if obj.Category:
+            return obj.Category.name
+        return None
 
+class ProductVariantCombinationSerializer(serializers.ModelSerializer):
 
-class VariantOptionSerializer(ModelSerializer):
-    class Meta:
-        model = VariantOption
-        fields = ['value']
-
-
-class VariantSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
     options = serializers.SerializerMethodField()
 
     class Meta:
-        model = Variant
-        fields = ['name', 'options']
+        model = ProductVariantCombination
+        fields = ['id', 'name', 'sku', 'image', 'price', 'options', 'stock', 'created_date']
 
+    def get_name(self, obj):
+        return obj.product.ProductName
+
+    def get_price(self, obj):
+        return obj.product.price
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        image_url = obj.product.ProductImage.url if obj.product.ProductImage else None
+        return image_url
 
     def get_options(self, obj):
-        return [option.value for option in obj.options.all()]
+        return [
+            {
+                "name": option.variant.name,
+                "value": option.value
+            }
+            for option in obj.options.select_related('variant').all()
+        ]
 
-
-class ProductDetailSerializer(ModelSerializer):
-    variants = VariantSerializer(many=True, read_only=True)
-    class Meta:
-        model = Products
-        fields = ['id', 'ProductName', 'variants', 'Active']
-
-# --------------------------------------------- Serializers for Creation --------------------------------------#
 
 class VariantInputSerializer(serializers.Serializer):
     name = serializers.CharField()
@@ -48,52 +63,88 @@ class CombinationInputSerializer(serializers.Serializer):
     sku = serializers.CharField()
     stock = serializers.DecimalField(max_digits=20, decimal_places=8)
     options = serializers.ListField(child=serializers.CharField())
+    description = serializers.CharField()
 
 
 class ProductCreateSerializer(serializers.ModelSerializer):
+
+    Category = serializers.CharField()
     variants = VariantInputSerializer(many=True)
     combinations = CombinationInputSerializer(many=True)
-    CreatedUser = serializers.CharField()
 
     class Meta:
         model = Products
-        fields = ['ProductName', 'ProductCode', 'ProductID', 'variants', 'combinations', 'CreatedUser']
+        fields = ['ProductName', 'ProductID', 'ProductCode', 'TotalStock', 'Category',
+                  'is_new', 'in_stock', 'rating', 'review_count', 'discount', 'old_price',
+                   'price', 'variants', 'combinations']
 
     def create(self, validated_data):
-        variants_data = validated_data.pop("variants")
-        combinations_data = validated_data.pop("combinations")
-        created_user = User.objects.get(username=validated_data.pop("CreatedUser"))
 
-        product = Products.objects.create(CreatedUser=created_user, **validated_data)
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            raise serializers.ValidationError("User authentication is required to create a product.")
 
-        self._create_variants_and_combinations(product, variants_data, combinations_data)
+        variants_data = validated_data.pop("variants", [])
+        combinations_data = validated_data.pop("combinations", [])
+        category = validated_data.pop("Category")
+
+        try:
+            category_obj = Category.objects.filter(name=category).first()
+        except Exception as e:
+            raise serializers.ValidationError(f"Error creating product: {str(e)}")
+
+        try:
+            product = Products.objects.create(CreatedUser=request.user, **validated_data)
+            product.Category = category_obj
+        except Exception as e:
+            raise serializers.ValidationError(f"Error creating product: {str(e)}")
+
+        try:
+            self._create_variants_and_combinations(product, variants_data, combinations_data)
+        except Exception as e:
+            product.delete()  # rollback product if variant creation fails
+            raise serializers.ValidationError(f"Error creating variants or combinations: {str(e)}")
+
         return product
 
     def update(self, instance, validated_data):
+
+        request = self.context.get('request')
+
+        # Check that only the user who created the product can update
+        if instance.CreatedUser != request.user:
+            raise serializers.ValidationError("You are not authorized to update this product.")
+
         variants_data = validated_data.pop("variants", [])
         combinations_data = validated_data.pop("combinations", [])
-        created_user_username = validated_data.pop("CreatedUser", None)
+        category_name = validated_data.pop("Category", None)
 
-        # Update basic product fields
+        if category_name:
+            category_obj = Category.objects.filter(name=category_name).first()
+            instance.Category = category_obj
+
+        # Update product fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
-        if created_user_username:
-            user = User.objects.get(username=created_user_username)
-            instance.CreatedUser = user
+        try:
+            instance.save()
+        except Exception as e:
+            raise serializers.ValidationError(f"Error updating product: {str(e)}")
 
-        instance.save()
-
-        # Delete existing variants and combinations (simplest approach)
-        instance.variants.all().delete()
-        instance.variant_combinations.all().delete()
-
-        self._create_variants_and_combinations(instance, variants_data, combinations_data)
+        # Reset old variants/combinations
+        try:
+            instance.variants.all().delete()
+            instance.variant_combinations.all().delete()
+            self._create_variants_and_combinations(instance, variants_data, combinations_data)
+        except Exception as e:
+            raise serializers.ValidationError(f"Error recreating variants/combinations: {str(e)}")
 
         return instance
 
     def _create_variants_and_combinations(self, product, variants_data, combinations_data):
         opt_lookup = {}
+
         for variant in variants_data:
             variant_obj = Variant.objects.create(product=product, name=variant["name"])
             for option in variant['options']:
@@ -103,10 +154,12 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         for combination in combinations_data:
             combo_obj = ProductVariantCombination.objects.create(
                 product=product,
+                description=combination['description'],
                 sku=combination['sku'],
                 stock=combination['stock']
             )
             for option_value in combination['options']:
                 opt_obj = opt_lookup.get(option_value)
-                if opt_obj:
-                    combo_obj.options.add(opt_obj)
+                if not opt_obj:
+                    raise serializers.ValidationError(f"Invalid option '{option_value}' in combination.")
+                combo_obj.options.add(opt_obj)

@@ -1,0 +1,154 @@
+.v1-variant-detail-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.v1-variant-breadcrumbs {
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  color: #555;
+}
+
+.v1-variant-breadcrumbs a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.v1-variant-breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+.v1-variant-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  border: 1px solid #eee;
+  padding: 2rem;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.v1-variant-image {
+  flex: 1 1 300px;
+  text-align: center;
+}
+
+.v1-variant-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  object-fit: cover;
+  max-height: 400px;
+}
+
+.v1-variant-info {
+  flex: 1 1 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.v1-variant-info h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.v1-variant-info h4 {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.v1-variant-options {
+  margin-bottom: 1rem;
+}
+
+.v1-option-pair {
+  margin-bottom: 0.3rem;
+  font-size: 1rem;
+}
+
+.v1-variant-info p {
+  font-size: 1rem;
+  margin: 0.3rem 0;
+}
+
+.v1-quantity-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.v1-quantity-actions button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.v1-quantity-actions button:hover {
+  background-color: #ddd;
+}
+
+.v1-quantity-actions input {
+  width: 50px;
+  text-align: center;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.v1-button-actions {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.v1-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.v1-primary-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.v1-primary-btn:hover {
+  background-color: #218838;
+}
+
+.v1-secondary-btn {
+  background-color: #f8f9fa;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.v1-secondary-btn:hover {
+  background-color: #e2e6ea;
+}
+
+@media (max-width: 768px) {
+  .v1-variant-card {
+    flex-direction: column;
+  }
+
+  .v1-variant-image img {
+    max-height: 300px;
+  }
+
+  .v1-variant-info {
+    margin-top: 1.5rem;
+  }
+}
