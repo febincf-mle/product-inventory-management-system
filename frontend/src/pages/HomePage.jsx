@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Product from '../components/Product'; 
-import axiosInstance from '../axiosInstance'
+import axiosInstance from '../axiosInstance';
 
 
 const HomePage = () => {
@@ -75,7 +75,7 @@ const HomePage = () => {
           <div className="products-grid" id="featured-products-container">
             {featuredProducts.length > 0 ? (
               featuredProducts.map((product) => (
-                <Product key={product.product_id} product={product} />
+                <Product key={product.id} product={product} />
               ))
             ) : (
               <p>No featured products available.</p>

@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 
 import axiosInstance from '../axiosInstance';
 import '../assets/variant.css';
+import { useAppContext } from '../context/AuthContext';
 
 const VariantDetailPage = () => {
 
@@ -11,7 +12,6 @@ const VariantDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
-  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchVariant = async () => {
@@ -20,7 +20,6 @@ const VariantDetailPage = () => {
         setVariant(res.data);
       } catch (err) {
         alert("something wrong happened")
-        navigate("/products")
       } finally {
         setLoading(false);
       }
@@ -38,12 +37,15 @@ const VariantDetailPage = () => {
 
   async function handleAddToCart() {
     try {
-      const response = axiosInstance.post('/actions/cart/add/', {
+      const response = await axiosInstance.post('/actions/cart/add/', {
         'product_variant': variant.id,
         'quantity': quantity,
       })
-      console.log(response.data)
-      alert("product added to cart successfully")
+      
+      if (response.status == 201) {
+        alert("product added to cart successfully")
+      }
+
     } catch (err) {
       alert("something wrong happened while addding product to the cart")
       console.error('Error fetching variant:', err);

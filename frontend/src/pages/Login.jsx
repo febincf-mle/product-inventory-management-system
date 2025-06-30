@@ -1,5 +1,6 @@
 import { useState, useContext } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
+import '../assets/login.css'
 
 import axios from 'axios'
 
@@ -43,6 +44,7 @@ function Login() {
             // Save the tokens in the Browser's local storage.
             localStorage.setItem('access-token', response.data.access);
             localStorage.setItem('refresh-token', response.data.refresh);
+            alert("Successfully Logged in")
 
             
             setFormData({
@@ -54,7 +56,8 @@ function Login() {
             navigate('/products'); 
 
         } catch (error) {
-            // Handle errors during registration       
+            // Handle errors during registration   
+            alert("Could'nt login, Check the credentials again")    
             setLoading(false);
             setFormData({
                 username: '',
@@ -64,13 +67,33 @@ function Login() {
     }
 
     return (
-        <>  
-            <form onSubmit={handleLogin}>
-                <input type="text" name="username" value={formData.username} onChange={handleChange} placeholder='username' />
-                <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder='password' />
-                <button type='submit'>Login</button>
-            </form>
-        </>
+        <div className="login-container">
+        <form className="login-box" onSubmit={handleLogin}>
+            <h2>Login</h2>
+            <input
+            className="login-input"
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            placeholder="Username"
+            required
+            />
+            <input
+            className="login-input"
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Password"
+            required
+            />
+            <span>Don't have an account? <Link to="/register">Register</Link></span>
+            <button className="login-button" type="submit" disabled={isLoading}>
+            {isLoading ? 'Logging in...' : 'Login'}
+            </button>
+        </form>
+        </div>
     )
 }
 

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
+import { useAppContext } from '../context/AuthContext';
 
 const PaymentPage = () => {
 
+  const { isLoggedIn } = useAppContext();
   const [paymentMethod, setPaymentMethod] = useState('card');
   const navigate = useNavigate();
 
@@ -24,6 +26,12 @@ const PaymentPage = () => {
       console.log(err);
     }
   };
+
+  if (!isLoggedIn) {
+    return (
+      <Link to="/login">Login to access this page</Link>
+    )
+  }
 
   return (
     <section className="payment-section">

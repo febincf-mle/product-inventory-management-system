@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 import axios from 'axios'
 
@@ -60,15 +60,42 @@ function Login() {
     }
 
     return (
-        <>  
-            <form onSubmit={handleLogin}>
-                <h1>Register</h1>
-                <input type="text" name="username" value={formData.username} onChange={handleChange} placeholder='username' />
-                <input type="text" name="email" value={formData.email} onChange={handleChange} placeholder='email' />
-                <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder='password' />
-                <button type='submit'>Login</button>
-            </form>
-        </>
+        <div className="login-container">
+        <form className="login-box" onSubmit={handleLogin}>
+            <h2>Register</h2>
+            <input
+            className="login-input"
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            placeholder="Username"
+            required
+            />
+            <input
+            className="login-input"
+            type="text"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="email"
+            required
+            />
+            <input
+            className="login-input"
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Password"
+            required
+            />
+            <span>Already have an account? <Link to="/login">Login</Link></span>
+            <button className="login-button" type="submit" disabled={isLoading}>
+            {isLoading ? 'Registering user...' : 'Register'}
+            </button>
+        </form>
+        </div>
     )
 }
 

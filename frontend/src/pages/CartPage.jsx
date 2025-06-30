@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useAppContext } from '../context/AuthContext';
 import axiosInstance from '../axiosInstance'
 
 const CartPage = () => {
 
+  const navigate = useNavigate()
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(0);
-  const { cart, setCart } = useAppContext();
+  const { cart, setCart, isLoggedIn } = useAppContext();
 
   // Calculate subtotal and total when cartItems or discount changes
   useEffect(() => {
@@ -28,10 +29,9 @@ const CartPage = () => {
         const response = await axiosInstance.get('actions/cart/')
         setCart(response.data.items)
         console.log(response.data.items);
-        
       }
       catch(err) {
-        console.log(err);
+        alert(err)
       }
   }
 
@@ -40,6 +40,12 @@ const CartPage = () => {
   };
 
   const isEmpty = cart.length === 0;
+
+  if (!isLoggedIn) {
+    return (
+      <Link to="/login">Login to access this page</Link>
+    )
+  }
 
   return (
     <div>

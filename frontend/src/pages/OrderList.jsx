@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../axiosInstance'; 
+import { useAppContext } from '../context/AuthContext';
 import '../assets/order-list.css';
 
 const OrderList = () => {
+
+  const { isLoggedIn } = useAppContext()
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -15,6 +18,7 @@ const OrderList = () => {
         setOrders(res.data);
       } catch (err) {
         console.error(err);
+        alert("Couldn't fetch orders, please try again later")
         setError('Failed to load orders. Please try again later.');
       } finally {
         setLoading(false);
@@ -30,6 +34,12 @@ const OrderList = () => {
 
   if (loading) return <div className="order-list-container"><p>Loading orders...</p></div>;
   if (error) return <div className="order-list-container error">{error}</div>;
+
+  if (!isLoggedIn) {
+    return (
+      <Link to="/login">Login to access this page</Link>
+    )
+  }
 
   return (
     <div className="order-list-container">

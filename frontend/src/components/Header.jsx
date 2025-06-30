@@ -5,11 +5,15 @@ import { useAppContext } from '../context/AuthContext'
 
 const Header = () => {
 
-  const { isLoggedIn, logout, cart } = useAppContext();
+  const { isLoggedIn, logout, cart, setCart } = useAppContext();
 
   const handleLogout = () => {
-    alert("You are about to get logged out!!!");
+
+    alert("You are logging out.")
     logout();
+    setCart([])
+    alert("Logged out successfully")
+
   };
 
   return (
@@ -34,11 +38,6 @@ const Header = () => {
         {/* Icons & Search */}
         <div className="header-icons">
 
-          <Link to="/wishlist" className="icon-link" title="wishlist">
-            <i className="fas fa-heart"></i>
-            <span className="icon-badge wishlist-count">0</span>
-          </Link>
-
           <Link to="/cart" className="icon-link" title="cart">
             <i className="fas fa-shopping-cart"></i>
             <span className="icon-badge cart-count">{ cart.length }</span>
@@ -48,6 +47,12 @@ const Header = () => {
             <a href="#" onClick={(e) => { e.preventDefault(); handleLogout(); }} className="icon-link" title="logout">
               <i className="fas fa-right-from-bracket"></i>
             </a>
+          )}
+
+          {!isLoggedIn && (
+            <Link to="/login" className="icon-link" title="sign in">
+              <i className="fas fa-sign-in"></i>
+            </Link>
           )}
 
           <button className="mobile-menu-toggle" onClick={() => console.log('Toggle mobile menu')}>

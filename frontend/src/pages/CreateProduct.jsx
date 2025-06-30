@@ -1,11 +1,14 @@
-// src/components/ProductForm.jsx
-
 import React, { useState } from 'react';
-import axios from 'axios';
-import '../assets/create-product.css';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAppContext } from '../context/AuthContext';
 import axiosInstance from '../axiosInstance';
 
+import '../assets/create-product.css';
 const ProductForm = () => {
+
+  const { isLoggedIn } = useAppContext();
+  const navigate = useNavigate();
+
   const [product, setProduct] = useState({
     ProductName: '',
     ProductID: '',
@@ -23,6 +26,7 @@ const ProductForm = () => {
     combinations: [],
     ProductImage: null,
   });
+  
 
   const [newVariant, setNewVariant] = useState({ name: '', options: [''] });
   const [newCombination, setNewCombination] = useState({
@@ -88,20 +92,83 @@ const ProductForm = () => {
   };
 
   const handleSubmit = async () => {
-  
     try {
-      await axiosInstance.post('products/', product, {
+      const formData = new FormData();
+
+      // Append basic fields
+      formData.append('ProductName', product.ProductName);
+      formData.append('ProductID', product.ProductID);
+      formData.append('ProductCode', product.ProductCode);
+      formData.append('TotalStock', product.TotalStock);
+      formData.append('Category', product.Category);
+      formData.append('is_new', product.is_new);
+      formData.append('in_stock', product.in_stock);
+      formData.append('rating', product.rating);
+      formData.append('review_count', product.review_count);
+      formData.append('discount', product.discount);
+      formData.append('old_price', product.old_price);
+      formData.append('price', product.price);
+
+      // Append image
+      if (product.ProductImage) {
+        formData.append('ProductImage', product.ProductImage);
+      }
+
+      // Append variants as JSON string
+      formData.append('variants', JSON.stringify(product.variants));
+
+      // Append combinations as JSON string
+      formData.append('combinations', JSON.stringify(product.combinations));
+
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
+      // Submit to backend
+      const response = await axiosInstance.post('products/', formData, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
       });
-      console.log(product)
+
       alert('Product submitted successfully!');
+      setProduct({
+        ProductName: '',
+        ProductID: '',
+        ProductCode: '',
+        TotalStock: 0,
+        Category: '',
+        is_new: true,
+        in_stock: true,
+        rating: 0,
+        review_count: 0,
+        discount: 0,
+        old_price: 0,
+        price: 0,
+        variants: [],
+        combinations: [],
+        ProductImage: null,
+      });
+
+      setNewVariant({ name: '', options: [''] });
+
+      setNewCombination({
+        sku: '',
+        description: '',
+        stock: 0,
+        options: [],
+      });
     } catch (err) {
       console.error(err);
       alert('Failed to submit.');
     }
   };
+
+  if (!isLoggedIn) {
+    return (
+      <Link to="/login">Login to access this page</Link>
+    )
+  }
 
   return (
     <div className="product-form-container">

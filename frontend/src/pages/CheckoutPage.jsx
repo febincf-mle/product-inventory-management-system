@@ -1,31 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAppContext } from '../context/AuthContext';
 
 import axiosInstance from '../axiosInstance';
 
 const CheckoutPage = () => {
+
   const navigate = useNavigate();
-
-  const [cartItems, setCartItems] = useState(null);
-
-  useEffect(() => {
-    axiosInstance.get('actions/cart/') // Replace with your actual endpoint
-      .then((res) => {
-        const items = res.data.items;
-        setCartItems(items);
-
-        const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const tax = subtotal * 0.05; // Example: 5% tax
-        setSummary(prev => ({
-          ...prev,
-          subtotal,
-          tax,
-        }));
-      })
-      .catch((err) => {
-        console.error("Error fetching cart:", err);
-      });
-  }, []);
+  const { cart: cartItems, isLoggedIn } = useAppContext();
 
   // Shipping form state
   const [form, setForm] = useState({
@@ -66,6 +48,12 @@ const CheckoutPage = () => {
   };
 
   const total = summary.subtotal + summary.shipping + summary.tax - summary.discount;
+
+  if (!isLoggedIn) {
+    return (
+      <Link to="/login">Login to access this page</Link>
+    )
+  }
 
   return cartItems && (
     <div>

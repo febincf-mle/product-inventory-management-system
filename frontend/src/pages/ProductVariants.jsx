@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 
 import axiosInstance from '../axiosInstance';
 import '../assets/product-variant.css'; 
 
 const ProductVariantsPage = () => {
+
   const { id } = useParams();
   const [variants, setVariants] = useState([]);
   const [productName, setProductName] = useState('');
@@ -17,6 +18,7 @@ const ProductVariantsPage = () => {
         setVariants(res.data.variants || []);
         setProductName(res.data.product_name || '');
       } catch (error) {
+        alert("Error fetching related data.")
         console.error('Error fetching product variants:', error);
       } finally {
         setLoading(false);

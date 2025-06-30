@@ -69,14 +69,27 @@ class CombinationInputSerializer(serializers.Serializer):
 class ProductCreateSerializer(serializers.ModelSerializer):
 
     Category = serializers.CharField()
-    variants = VariantInputSerializer(many=True)
-    combinations = CombinationInputSerializer(many=True)
+    variants = serializers.JSONField()
+    combinations = serializers.JSONField()
 
     class Meta:
         model = Products
-        fields = ['ProductName', 'ProductID', 'ProductCode', 'TotalStock', 'Category',
+        fields = ['ProductName', 'ProductID', 'ProductImage', 'ProductCode', 'TotalStock', 'Category',
                   'is_new', 'in_stock', 'rating', 'review_count', 'discount', 'old_price',
                    'price', 'variants', 'combinations']
+        
+    def validate(self, attrs):
+        # Validate variants
+        variants_data = attrs.get('variants', [])
+        variant_serializer = VariantInputSerializer(data=variants_data, many=True)
+        variant_serializer.is_valid(raise_exception=True)
+
+        # Validate combinations
+        combinations_data = attrs.get('combinations', [])
+        combination_serializer = CombinationInputSerializer(data=combinations_data, many=True)
+        combination_serializer.is_valid(raise_exception=True)
+
+        return attrs
 
     def create(self, validated_data):
 

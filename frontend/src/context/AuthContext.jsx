@@ -6,6 +6,7 @@ const AuthContext = createContext();
 
 // 2. Create the provider component
 export default function AuthProvider ({ children }) {
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cart, setCart] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -22,6 +23,8 @@ export default function AuthProvider ({ children }) {
 
   const logout = () => {
     localStorage.removeItem('access-token');
+    localStorage.removeItem('refresh-token');
+    
     setIsLoggedIn(false);
     setCart([]);
     setNotifications([]);

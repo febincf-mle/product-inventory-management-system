@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAppContext } from '../context/AuthContext';
 
 const OrderConfirmationPage = () => {
+  
   // Dummy data — replace with props, context, or API data as needed
   const order = {
     id: '12345',
@@ -15,6 +17,14 @@ const OrderConfirmationPage = () => {
       { name: 'Another Item', quantity: 1, price: 149.99 },
     ]
   };
+
+  const { isLoggedIn } = useAppContext();
+
+  if (!isLoggedIn) {
+    return (
+      <Link to="/login">Login to access this page</Link>
+    )
+  }
 
   return (
     <div>

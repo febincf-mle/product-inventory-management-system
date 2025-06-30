@@ -45,10 +45,8 @@ const ProductsPage = () => {
       params.append('page', currentPage);
       params.append('page_size', pageSize);
 
-      const response = await axiosInstance.get(`http://localhost:8000/api/v1/products/?${params.toString()}`);
+      const response = await axiosInstance.get(`products/?${params.toString()}`);
       const data = response.data;
-
-      console.log(data);
       
       setProducts(data.results || []);
       setTotalCount(data.count || 0);
@@ -59,6 +57,7 @@ const ProductsPage = () => {
         setCategories(allCats);
       }
     } catch (error) {
+      alert("Error happened when applying filters.")
       console.error('Error fetching products:', error);
     }
   };
