@@ -48,6 +48,41 @@ const CartPage = () => {
       }
   }
 
+  const handleRemoveCart = async (id) => {
+    try {
+      const response = await axiosInstance.delete(`actions/cart/remove/${id}/`);
+      addNotification({
+        type: 'success',
+        content: '1x item removed from cart'
+      });
+
+      const CartItem = cart.filter(c => c.id === id)[0];
+      const remainingItems = cart.filter(c => id !== id);
+
+      if (CartItem.quantity > 1) {
+        CartItem.quantity -= 1;
+        setCart([...remainingItems, CartItem])
+      }else {
+        setCart([...remainingItems])
+      }
+    }
+    catch (err) {
+
+      if (err.response.status === 401) {
+        addNotification({
+          type: 'warning',
+          content: 'You need to login.'
+        });
+      }
+      else {
+        addNotification({
+          type: 'warning',
+          content: 'Removing Item failed.'
+        }); 
+      }
+    }
+  }
+
   const isEmpty = cart.length === 0;
 
   if (!isLoggedIn) {
@@ -99,6 +134,9 @@ const CartPage = () => {
                     <div style={{ width: 100 }}>${item.price.toFixed(2)}</div>
                     <div style={{ width: 100 }}>{item.quantity}</div>
                     <div style={{ width: 100 }}>${(item.price * item.quantity).toFixed(2)}</div>
+                    <div style={{ width: 100 }}>
+                      <button className="btn secondary-btn" style={{backgroundColor: "tomato"}} onClick={() => handleRemoveCart(item.id)}>remove</button>
+                    </div>
                   </div>
                 ))
               )}

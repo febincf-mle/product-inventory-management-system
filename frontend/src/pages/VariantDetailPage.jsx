@@ -61,6 +61,8 @@ const VariantDetailPage = () => {
         })
       }
 
+      navigate("/cart");
+
     } catch (err) {
       
       if (err.status == 401) {

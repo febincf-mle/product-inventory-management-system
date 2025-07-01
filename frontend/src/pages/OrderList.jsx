@@ -6,10 +6,11 @@ import '../assets/order-list.css';
 
 const OrderList = () => {
 
-  const { isLoggedIn, addNotification } = useAppContext()
+  const { isLoggedIn, addNotification } = useAppContext();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [ date, setDate ] = useState('');
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -40,6 +41,40 @@ const OrderList = () => {
     fetchOrders();
   }, []);
 
+  const filterOrders = async (e) => {
+
+    e.preventDefault();
+    if (date == '') return
+    try {
+      const res = await axiosInstance.get(`actions/orders/?date=${date}`);
+      setOrders(res.data);
+
+    } catch (err) {
+
+      if (err.response.status == 401) {
+        addNotification({
+          type: 'warning',
+          content: 'You need to login to access this'
+        })
+      }
+      else if (err.response.status == 400) {
+        addNotification({
+          type: 'warning',
+          content: 'Enter a Valid date'
+        })
+      }
+      else {
+        addNotification({
+          type: 'warning',
+          content: 'Cannot apply filter for that date.'
+        })
+      }
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleExpand = (id) => {
     setExpandedOrderId(expandedOrderId === id ? null : id);
   };
@@ -54,7 +89,11 @@ const OrderList = () => {
 
   return (
     <div className="order-list-container">
-      <h2>Your Orders</h2>
+      <form action="">
+        <h2>Your Orders</h2>
+        <input type="text" name="date" value={date} onChange={(e) => setDate(e.target.value)} id="" placeholder="YYYY-MM-DD format" />
+        <button type="submit" className='btn btn-primary' onClick={filterOrders}>filter</button>
+      </form>
       {orders.length === 0 ? (
         <p>No orders found.</p>
       ) : (

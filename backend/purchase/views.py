@@ -6,6 +6,7 @@ from django.utils.dateparse import parse_date
 
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
 from products.models import ProductVariantCombination
@@ -228,9 +229,20 @@ class OrderListView(generics.ListAPIView):
         start_date_str = params.get('start_date')
         end_date_str = params.get('end_date')
 
-        exact_date = parse_date(date_str) if date_str else None
-        start_date = parse_date(start_date_str) if start_date_str else None
-        end_date = parse_date(end_date_str) if end_date_str else None
+        def safe_parse_date(date_str, field_name):
+            if not date_str:
+                return None
+            try:
+                parsed_date = parse_date(date_str)
+                if not parsed_date:
+                    raise ValueError
+                return parsed_date
+            except ValueError:
+                raise ValidationError({field_name: f"Invalid date value '{date_str}'. Expected format: YYYY-MM-DD with a valid date."})
+
+        exact_date = safe_parse_date(date_str, 'date')
+        start_date = safe_parse_date(start_date_str, 'start_date')
+        end_date = safe_parse_date(end_date_str, 'end_date')
 
         if exact_date:
             queryset = queryset.filter(created_at__date=exact_date)
