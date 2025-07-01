@@ -1,5 +1,6 @@
 import { useState, useContext } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useAppContext } from '../context/AuthContext';
 
 import axios from 'axios'
 
@@ -12,11 +13,12 @@ function Login() {
         password: ''
     });
 
+    const { isLoggedIn, addNotification } = useAppContext();
+    const [isLoading, setLoading] = useState(false);
+    const [ errors, setErrors ] = useState([]);
+
     // useNavigate hook to programmatically navigate.
     const navigate = useNavigate()
-
-    // State to manage the loading.
-    const [isLoading, setLoading] = useState(false);
 
     // Function to handle form input changes.
     const handleChange = (e) => {
@@ -43,17 +45,27 @@ function Login() {
 
             setFormData({
                 username: '',
+                email: '',
                 password: ''
             });
 
+            addNotification({
+                type: 'success',
+                content: 'User Registration successfull'
+            })
+
+            setErrors([]);
             setLoading(false);
             navigate('/login'); 
 
         } catch (error) {
-            // Handle errors during registration       
+            // Handle errors during registration    
+            
+            setErrors(error.response.data)
             setLoading(false);
             setFormData({
                 username: '',
+                email: '',
                 password: ''
             });
         }
@@ -72,6 +84,7 @@ function Login() {
             placeholder="Username"
             required
             />
+            {errors && errors.username && <p style={{color: "red"}}>{errors.username[0]}</p>}
             <input
             className="login-input"
             type="text"
@@ -81,6 +94,7 @@ function Login() {
             placeholder="email"
             required
             />
+            {errors && errors.email && <p style={{color: "red"}}>{errors.email[0]}</p>}
             <input
             className="login-input"
             type="password"
@@ -90,6 +104,7 @@ function Login() {
             placeholder="Password"
             required
             />
+            {errors && errors.password && <p style={{color: "red"}}>{errors.password[0]}</p>}
             <span>Already have an account? <Link to="/login">Login</Link></span>
             <button className="login-button" type="submit" disabled={isLoading}>
             {isLoading ? 'Registering user...' : 'Register'}

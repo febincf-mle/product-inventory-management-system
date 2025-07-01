@@ -1,8 +1,9 @@
 import { useState, useContext } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import '../assets/login.css'
-
+import { useAppContext } from '../context/AuthContext'
 import axios from 'axios'
+
+import '../assets/login.css'
 
 
 function Login() {
@@ -12,11 +13,14 @@ function Login() {
         password: ''
     });
 
+    const { addNotification, login } = useAppContext();
+
     // useNavigate hook to programmatically navigate.
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     // State to manage the loading.
     const [isLoading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     // Function to handle form input changes.
     const handleChange = (e) => {
@@ -42,11 +46,13 @@ function Login() {
             const response = await axios.post('http://127.0.0.1:8000/api/v1/login/', formData);
 
             // Save the tokens in the Browser's local storage.
-            localStorage.setItem('access-token', response.data.access);
-            localStorage.setItem('refresh-token', response.data.refresh);
-            alert("Successfully Logged in")
+            login(response.data.access, response.data.refresh)
+            setError('')
+            addNotification({
+                type: 'success',
+                content: 'Login successful'
+            })
 
-            
             setFormData({
                 username: '',
                 password: ''
@@ -57,7 +63,13 @@ function Login() {
 
         } catch (error) {
             // Handle errors during registration   
-            alert("Could'nt login, Check the credentials again")    
+            addNotification({
+                type: 'warning',
+                content: 'Login attempt failed.'
+            }) 
+                        
+            setError(error.response.data.error);
+
             setLoading(false);
             setFormData({
                 username: '',
@@ -88,6 +100,7 @@ function Login() {
             placeholder="Password"
             required
             />
+            { error && <p style={{color: "red"}}>{error}</p>}
             <span>Don't have an account? <Link to="/register">Register</Link></span>
             <button className="login-button" type="submit" disabled={isLoading}>
             {isLoading ? 'Logging in...' : 'Login'}

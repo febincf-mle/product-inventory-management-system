@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 
 import axiosInstance from '../axiosInstance';
-import '../assets/variant.css';
 import { useAppContext } from '../context/AuthContext';
+
+import '../assets/variant.css';
+
 
 const VariantDetailPage = () => {
 
@@ -11,6 +13,8 @@ const VariantDetailPage = () => {
   const [variant, setVariant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const { addNotification, setCart } = useAppContext();
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -19,7 +23,10 @@ const VariantDetailPage = () => {
         const res = await axiosInstance.get(`products/variant-combinations/${id}/`);
         setVariant(res.data);
       } catch (err) {
-        alert("something wrong happened")
+        addNotification({
+          type: 'warning',
+          content: 'Error while fetching the variant data.'
+        })
       } finally {
         setLoading(false);
       }
@@ -36,20 +43,42 @@ const VariantDetailPage = () => {
   };
 
   async function handleAddToCart() {
+    setLoading(true)
+
     try {
       const response = await axiosInstance.post('/actions/cart/add/', {
         'product_variant': variant.id,
         'quantity': quantity,
       })
-      
+
+      const cartResponse = await axiosInstance.get('/actions/cart/')
+      setCart(cartResponse.data.items)
+       
       if (response.status == 201) {
-        alert("product added to cart successfully")
+        addNotification({
+          type: 'success',
+          content: "product added to cart successfully"
+        })
       }
 
     } catch (err) {
-      alert("something wrong happened while addding product to the cart")
-      console.error('Error fetching variant:', err);
-    } finally {
+      
+      if (err.status == 401) {
+        addNotification({
+          type: 'warning',
+          content: "You must login to buy the product."
+        })
+        navigate("/login");
+      }
+
+      else if (err.status == 400) {
+        addNotification({
+          type: 'warning',
+          content: 'Not enough stock avaiable, check your cart.'
+        })
+      }
+    } 
+    finally {
       setLoading(false);
     }
   }

@@ -1,18 +1,37 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AuthContext'
+import axiosInstance from '../axiosInstance';
 
 
 const Header = () => {
 
-  const { isLoggedIn, logout, cart, setCart } = useAppContext();
+  const { isLoggedIn, logout, cart, setCart, addNotification } = useAppContext();
+
+  useEffect(() => {
+    // FETCH user's cart if he is
+    // logged in
+    if (isLoggedIn) fetchCart();
+
+  }, [isLoggedIn])
+
+  const fetchCart = async () => {
+    try {
+      const response = await axiosInstance.get("actions/cart/");
+      setCart(response.data.items)
+    }
+    catch (err) {
+      return
+    }
+  }
 
   const handleLogout = () => {
 
-    alert("You are logging out.")
     logout();
-    setCart([])
-    alert("Logged out successfully")
+    addNotification({
+      type: "success",
+      content: "Successfully logged out"
+    })
 
   };
 
@@ -30,8 +49,7 @@ const Header = () => {
             <li className="nav-item"><Link to="/" className="active">Home</Link></li>
             <li className="nav-item"><Link to="/products">Products</Link></li>
             <li className="nav-item"><Link to="/create">Create</Link></li>
-            <li className="nav-item"><a href="#" onClick={(e) => e.preventDefault()}>About</a></li>
-            <li className="nav-item"><a href="#" onClick={(e) => e.preventDefault()}>Contact</a></li>
+            <li className="nav-item"><Link to="/orders">Orders</Link></li>
           </ul>
         </nav>
 

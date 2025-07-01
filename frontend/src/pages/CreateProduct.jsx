@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAppContext } from '../context/AuthContext';
+import NotAuthenticated from '../components/NotAuthenticated';
 import axiosInstance from '../axiosInstance';
 
 import '../assets/create-product.css';
@@ -166,7 +167,7 @@ const ProductForm = () => {
 
   if (!isLoggedIn) {
     return (
-      <Link to="/login">Login to access this page</Link>
+      <NotAuthenticated />
     )
   }
 

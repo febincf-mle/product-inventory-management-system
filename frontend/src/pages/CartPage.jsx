@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useAppContext } from '../context/AuthContext';
-import axiosInstance from '../axiosInstance'
+import NotAuthenticated from '../components/NotAuthenticated';
+import axiosInstance from '../axiosInstance';
 
 const CartPage = () => {
 
   const navigate = useNavigate()
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(0);
-  const { cart, setCart, isLoggedIn } = useAppContext();
+  const { cart, setCart, isLoggedIn, addNotification } = useAppContext();
 
   // Calculate subtotal and total when cartItems or discount changes
   useEffect(() => {
@@ -28,22 +29,30 @@ const CartPage = () => {
       try{
         const response = await axiosInstance.get('actions/cart/')
         setCart(response.data.items)
-        console.log(response.data.items);
       }
       catch(err) {
-        alert(err)
+
+        if (err.response.status == 401) {
+          addNotification({
+            type: 'warning',
+            content: 'You need to login to access this.'
+          })
+          navigate("/login");
+        }
+        else {
+          addNotification({
+            type: 'warning',
+            content: 'Error while fetching the cart, please try again later.'
+          })
+        }
       }
   }
-
-  const handleProceedToCheckout = () => {
-    alert('Proceeding to checkout...');
-  };
 
   const isEmpty = cart.length === 0;
 
   if (!isLoggedIn) {
     return (
-      <Link to="/login">Login to access this page</Link>
+      <NotAuthenticated/>
     )
   }
 

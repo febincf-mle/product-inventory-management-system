@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axiosInstance from '../axiosInstance'
 
 import Product from '../components/Product';
+import { useAppContext } from '../context/AuthContext';
+import axiosInstance from '../axiosInstance'
 
 const ProductsPage = () => {
 
   // State variables for Products and Categories.
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const  { addNotification } = useAppContext();
 
   // State variables for handling query parameters.
   const [selectedCategories, setSelectedCategories] = useState(['all']);
@@ -53,12 +55,16 @@ const ProductsPage = () => {
       setTotalPages(data.total_pages || 1);
 
       if (categories.length === 0 && data.results?.length > 0) {
-        const allCats = Array.from(new Set(data.results.map(p => p.Category)));
+        // Get categories list from the product list without duplicates.
+        let allCats = Array.from(new Set(data.results.map(p => p.Category)));
+        allCats = allCats.filter(item => item);
         setCategories(allCats);
       }
     } catch (error) {
-      alert("Error happened when applying filters.")
-      console.error('Error fetching products:', error);
+        addNotification({
+          type: 'warning',
+          content: 'Error while fetching products'
+        })
     }
   };
 

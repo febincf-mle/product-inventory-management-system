@@ -1,0 +1,47 @@
+/* src/pages/NotAuthenticated.css */
+
+.auth-error-wrapper {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to right, #667eea, #764ba2);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.auth-error-box {
+  background-color: #fff;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.auth-error-box h1 {
+  font-size: 28px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.auth-error-box p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.auth-error-button {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #667eea;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.auth-error-button:hover {
+  background-color: #556cd6;
+}

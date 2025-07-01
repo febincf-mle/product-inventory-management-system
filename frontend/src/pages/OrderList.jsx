@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../axiosInstance'; 
 import { useAppContext } from '../context/AuthContext';
+import NotAuthenticated from '../components/NotAuthenticated'
 import '../assets/order-list.css';
 
 const OrderList = () => {
 
-  const { isLoggedIn } = useAppContext()
+  const { isLoggedIn, addNotification } = useAppContext()
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [expandedOrderId, setExpandedOrderId] = useState(null);
 
   useEffect(() => {
@@ -16,10 +16,22 @@ const OrderList = () => {
       try {
         const res = await axiosInstance.get('actions/orders/');
         setOrders(res.data);
+
       } catch (err) {
-        console.error(err);
-        alert("Couldn't fetch orders, please try again later")
-        setError('Failed to load orders. Please try again later.');
+
+        if (err.response.status == 401) {
+          addNotification({
+            type: 'warning',
+            content: 'You need to login to access this'
+          })
+        }
+        else {
+          addNotification({
+            type: 'warning',
+            content: 'Something wrong while fetching orders, please try later'
+          })
+        }
+
       } finally {
         setLoading(false);
       }
@@ -33,11 +45,10 @@ const OrderList = () => {
   };
 
   if (loading) return <div className="order-list-container"><p>Loading orders...</p></div>;
-  if (error) return <div className="order-list-container error">{error}</div>;
 
   if (!isLoggedIn) {
     return (
-      <Link to="/login">Login to access this page</Link>
+      <NotAuthenticated />
     )
   }
 

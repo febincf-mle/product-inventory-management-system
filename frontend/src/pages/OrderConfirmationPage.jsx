@@ -1,28 +1,15 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAppContext } from '../context/AuthContext';
+import NotAuthenticated from '../components/NotAuthenticated';
+
 
 const OrderConfirmationPage = () => {
-  
-  // Dummy data — replace with props, context, or API data as needed
-  const order = {
-    id: '12345',
-    date: 'June 28, 2025',
-    total: 249.99,
-    email: 'email@example.com',
-    paymentMethod: 'Credit Card',
-    shippingAddress: '123 Street, City, Country',
-    items: [
-      { name: 'Sample Product', quantity: 2, price: 49.99 },
-      { name: 'Another Item', quantity: 1, price: 149.99 },
-    ]
-  };
 
   const { isLoggedIn } = useAppContext();
 
   if (!isLoggedIn) {
     return (
-      <Link to="/login">Login to access this page</Link>
+      <NotAuthenticated />
     )
   }
 
@@ -62,53 +49,6 @@ const OrderConfirmationPage = () => {
 
             {/* Order Success Message */}
             <div className="order-success">
-              <div className="success-icon">
-                <i className="fas fa-check-circle"></i>
-              </div>
-              <h3>Thank You For Your Order!</h3>
-              <p>Your order has been placed and is being processed. Your order number is <strong>#{order.id}</strong>.</p>
-              <p>You will receive an email confirmation shortly at <strong>{order.email}</strong>.</p>
-
-              {/* Order Details */}
-              <div className="order-details">
-                <h4>Order Details</h4>
-                <div className="order-info">
-                  <div className="info-item">
-                    <span className="info-label">Order Number:</span>
-                    <span className="info-value">{order.id}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Order Date:</span>
-                    <span className="info-value">{order.date}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Total Amount:</span>
-                    <span className="info-value">${order.total.toFixed(2)}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Payment Method:</span>
-                    <span className="info-value">{order.paymentMethod}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Shipping Address:</span>
-                    <span className="info-value">{order.shippingAddress}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Ordered Items */}
-              <div className="ordered-items">
-                <h4>Ordered Items</h4>
-                <ul>
-                  {order.items.map((item, index) => (
-                    <li key={index}>
-                      {item.quantity}x {item.name} - ${item.price.toFixed(2)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Actions */}
               <div className="confirmation-actions">
                 <Link to="/" className="btn primary-btn">Continue Shopping</Link>
                 <Link to="/orders" className="btn secondary-btn">View My Orders</Link>

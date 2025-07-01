@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useAppContext } from '../context/AuthContext';
 
 import axiosInstance from '../axiosInstance';
 import '../assets/product-variant.css'; 
@@ -10,6 +11,7 @@ const ProductVariantsPage = () => {
   const [variants, setVariants] = useState([]);
   const [productName, setProductName] = useState('');
   const [loading, setLoading] = useState(true);
+  const { addNotification } = useAppContext();
 
   useEffect(() => {
     const fetchVariants = async () => {
@@ -18,8 +20,10 @@ const ProductVariantsPage = () => {
         setVariants(res.data.variants || []);
         setProductName(res.data.product_name || '');
       } catch (error) {
-        alert("Error fetching related data.")
-        console.error('Error fetching product variants:', error);
+        addNotification({
+          type: 'warning',
+          content: 'Error fetching the variants data.'
+        })
       } finally {
         setLoading(false);
       }

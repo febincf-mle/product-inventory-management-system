@@ -16,22 +16,25 @@ export default function AuthProvider ({ children }) {
     setIsLoggedIn(!!token);
   }, []);
 
-  const login = (token) => {
-    localStorage.setItem('access-token', token);
+  const login = (accesToken, refreshToken) => {
+    localStorage.setItem('access-token', accesToken);
+    localStorage.setItem('refresh-token', refreshToken);
     setIsLoggedIn(true);
   };
 
   const logout = () => {
+
     localStorage.removeItem('access-token');
     localStorage.removeItem('refresh-token');
     
     setIsLoggedIn(false);
     setCart([]);
     setNotifications([]);
+
   };
 
   const addNotification = (message) =>
-    setNotifications((prev) => [...prev, { id: Date.now(), message }]);
+    setNotifications((prev) => [...prev, { id: Date.now(), ...message }]);
   const removeNotification = (id) =>
     setNotifications((prev) => prev.filter((n) => n.id !== id));
 
