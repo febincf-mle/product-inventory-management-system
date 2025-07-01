@@ -79,13 +79,21 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                    'price', 'variants', 'combinations']
         
     def validate(self, attrs):
-        # Validate variants
+        
         variants_data = attrs.get('variants', [])
+        combinations_data = attrs.get('combinations', [])
+
+        if not variants_data:
+            raise serializers.ValidationError({"variants": "At least one variant is required."})
+
+        if not combinations_data:
+            raise serializers.ValidationError({"combinations": "At least one combination is required."})
+        
+        # Validate variants
         variant_serializer = VariantInputSerializer(data=variants_data, many=True)
         variant_serializer.is_valid(raise_exception=True)
 
         # Validate combinations
-        combinations_data = attrs.get('combinations', [])
         combination_serializer = CombinationInputSerializer(data=combinations_data, many=True)
         combination_serializer.is_valid(raise_exception=True)
 

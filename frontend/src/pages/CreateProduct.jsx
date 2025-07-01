@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAppContext } from '../context/AuthContext';
 import NotAuthenticated from '../components/NotAuthenticated';
 import axiosInstance from '../axiosInstance';
 
 import '../assets/create-product.css';
+
 const ProductForm = () => {
 
-  const { isLoggedIn } = useAppContext();
+  const { isLoggedIn, addNotification } = useAppContext();
+  const [ error, setError ] = useState({})
   const navigate = useNavigate();
 
   const [product, setProduct] = useState({
@@ -121,10 +123,6 @@ const ProductForm = () => {
       // Append combinations as JSON string
       formData.append('combinations', JSON.stringify(product.combinations));
 
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-      }
-
       // Submit to backend
       const response = await axiosInstance.post('products/', formData, {
         headers: {
@@ -132,7 +130,13 @@ const ProductForm = () => {
         },
       });
 
-      alert('Product submitted successfully!');
+      addNotification({
+        type: 'success',
+        content: 'Product submitted successfully!'
+      });
+
+      setError({})
+
       setProduct({
         ProductName: '',
         ProductID: '',
@@ -160,8 +164,13 @@ const ProductForm = () => {
         options: [],
       });
     } catch (err) {
-      console.error(err);
-      alert('Failed to submit.');
+
+      setError(err.response.data)
+      
+      addNotification({
+        type: 'warning',
+        content: 'Product creation failed'
+      })
     }
   };
 
@@ -185,6 +194,7 @@ const ProductForm = () => {
           value={product.ProductName}
           onChange={handleProductChange}
         />
+        {error && error.ProductName && <p style={{color: "red"}}>{error.ProductName[0]}</p>}
       </div>
 
       <div className="form-group">
@@ -195,6 +205,7 @@ const ProductForm = () => {
           accept="image/*"
           onChange={handleImageChange}
         />
+        {error && error.ProductImage && <p style={{color: "red"}}>{error.ProductImage[0]}</p>}
       </div>
 
       <div className="form-row">
@@ -208,6 +219,7 @@ const ProductForm = () => {
             value={product.ProductID}
             onChange={handleProductChange}
           />
+        {error && error.ProductID && <p style={{color: "red"}}>{error.ProductID[0]}</p>}
         </div>
         <div className="form-group">
           <label htmlFor="ProductCode">Product Code</label>
@@ -219,6 +231,7 @@ const ProductForm = () => {
             value={product.ProductCode}
             onChange={handleProductChange}
           />
+        {error && error.ProductCode && <p style={{color: "red"}}>{error.ProductCode[0]}</p>}
         </div>
       </div>
 
@@ -234,6 +247,7 @@ const ProductForm = () => {
             value={product.TotalStock}
             onChange={handleProductChange}
           />
+        {error && error.TotalStock && <p style={{color: "red"}}>{error.TotalStock[0]}</p>}
         </div>
         <div className="form-group">
           <label htmlFor="Category">Category</label>
@@ -245,6 +259,7 @@ const ProductForm = () => {
             value={product.Category}
             onChange={handleProductChange}
           />
+        {error && error.Category && <p style={{color: "red"}}>{error.Category[0]}</p>}
         </div>
       </div>
 
@@ -260,6 +275,7 @@ const ProductForm = () => {
             value={product.price}
             onChange={handleProductChange}
           />
+        {error && error.price && <p style={{color: "red"}}>{error.price[0]}</p>}
         </div>
         <div className="form-group">
           <label htmlFor="old_price">Old Price</label>
@@ -272,6 +288,7 @@ const ProductForm = () => {
             value={product.old_price}
             onChange={handleProductChange}
           />
+        {error && error.old_price && <p style={{color: "red"}}>{error.old_price[0]}</p>}
         </div>
         <div className="form-group">
           <label htmlFor="discount">Discount</label>
@@ -284,6 +301,7 @@ const ProductForm = () => {
             value={product.discount}
             onChange={handleProductChange}
           />
+        {error && error.discount && <p style={{color: "red"}}>{error.discount[0]}</p>}
         </div>
       </div>
 
@@ -295,10 +313,13 @@ const ProductForm = () => {
             step="any"
             id="rating"
             name="rating"
+            min="0"
+            max="5"
             placeholder="Rating"
             value={product.rating}
             onChange={handleProductChange}
           />
+        {error && error.rating && <p style={{color: "red"}}>{error.rating[0]}</p>}
         </div>
         <div className="form-group">
           <label htmlFor="review_count">Review Count</label>
@@ -311,6 +332,7 @@ const ProductForm = () => {
             value={product.review_count}
             onChange={handleProductChange}
           />
+        {error && error.review_count && <p style={{color: "red"}}>{error.review_count[0]}</p>}
         </div>
       </div>
 
@@ -368,6 +390,8 @@ const ProductForm = () => {
         <button type="button" onClick={addVariant}>
           Add Variant
         </button>
+        {error && error.variants && <p style={{color: "red"}}>{error.variants[0]}</p>}
+        <p>Info: Click on Add Variant button before submitting.</p>
       </div>
 
       <hr />
@@ -427,10 +451,12 @@ const ProductForm = () => {
         <button type="button" onClick={addCombination}>
           Add Combination
         </button>
+        {error && error.combinations && <p style={{color: "red"}}>{error.combinations[0]}</p>}
+        <p>Info: Click on Add Combination button before submitting.</p>
       </div>
 
       <hr />
-
+      
       <button className="submit-btn" onClick={handleSubmit}>
         Submit Product
       </button>
