@@ -87,7 +87,7 @@ inventory-management-system/
 2. **Start the React app**
 
    ```bash
-   npm start
+   npm run dev
    ```
 
 > Frontend runs at: `http://localhost:3000/`
